@@ -9,7 +9,7 @@ on:
       - main  # Trigger on pull request to main
   schedule:
     # Cron syntax to trigger the workflow every Sunday at 2 AM UTC
-    - cron: '1 * * * 0'  # Runs every Sunday at 2:00 AM UTC
+    - cron: '* * * * *'  # Runs every Sunday at 2:00 AM UTC
 
 jobs:
   test:
