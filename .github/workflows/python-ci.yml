@@ -1,5 +1,5 @@
 name: Python CI Workflow
- 
+
 on:
   push:
     branches:
@@ -7,35 +7,60 @@ on:
   pull_request:
     branches:
       - main  # Trigger on pull request to main
- 
+  schedule:
+    # Cron syntax to trigger the workflow every Sunday at 2 AM UTC
+    - cron: '1 * * * 0'  # Runs every Sunday at 2:00 AM UTC
+
 jobs:
   test:
     strategy:
       matrix:
         python-version: [3.8, 3.9]  # Test only Python 3.8 and 3.9
         os: [ubuntu-latest, windows-latest, macos-latest]  # Different OS
- 
+
     runs-on: ${{ matrix.os }}  # The OS will be selected from the matrix
- 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3  # Checkout the repository's code
- 
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4  # Set up Python version
         with:
           python-version: ${{ matrix.python-version }}
- 
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip  # Upgrade pip
           pip install -r requirement.txt || echo "No requirement.txt file"  # Install dependencies (if any)
- 
+
       - name: Show Python version and OS
         run: |
           echo "Running on OS: ${{ matrix.os }}"
           python --version  # Check Python version
- 
+
       - name: Run python.py
         run: |
-          python python.py  # Execute your main.py script
+          python python.py  # Execute your python.py script
+
+  cronjob:
+    if: github.event_name == 'schedule'  # Only run this job when the trigger is from the scheduled cron event
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirement.txt || echo "No requirement.txt file"
+
+      - name: Run python.py for Cron Job
+        run: |
+          python python.py
